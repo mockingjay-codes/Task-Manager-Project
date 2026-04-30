@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "cZfK6cMHZWc=",
+  "success": true,
+  "projectFilePath": "/Users/emmamcguire/Documents/Task Manager Project/TaskManager/TaskManager.csproj",
+  "expectedPackageFiles": [
+    "/Users/emmamcguire/.nuget/packages/microsoft.aspnetcore.app.internal.assets/10.0.7/microsoft.aspnetcore.app.internal.assets.10.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}
