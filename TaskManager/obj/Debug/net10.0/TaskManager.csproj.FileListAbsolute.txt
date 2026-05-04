@@ -83,3 +83,4 @@
 /Users/emmamcguire/Documents/Task Manager Project/TaskManager/obj/Debug/net10.0/TaskManager.pdb
 /Users/emmamcguire/Documents/Task Manager Project/TaskManager/obj/Debug/net10.0/TaskManager.genruntimeconfig.cache
 /Users/emmamcguire/Documents/Task Manager Project/TaskManager/obj/Debug/net10.0/ref/TaskManager.dll
+/Users/emmamcguire/Documents/Task Manager Project/TaskManager/obj/Debug/net10.0/TaskManager.sourcelink.json

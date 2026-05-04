@@ -38,12 +38,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ib21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/emmamcguire/Documents/Task Manager Project/TaskManager/Components/Pages/NotFound.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ob3RGb3VuZC5yYXpvcg==
+[/Users/emmamcguire/Documents/Task Manager Project/TaskManager/Components/Pages/ManageTasks.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9NYW5hZ2VUYXNrcy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/emmamcguire/Documents/Task Manager Project/TaskManager/Components/Pages/Weather.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9XZWF0aGVyLnJhem9y
+[/Users/emmamcguire/Documents/Task Manager Project/TaskManager/Components/Pages/NotFound.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ob3RGb3VuZC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/emmamcguire/Documents/Task Manager Project/TaskManager/Components/Routes.razor]
