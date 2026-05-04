@@ -59,6 +59,6 @@ public class TasksController(TaskService taskService) : ControllerBase
 }
 
 // Define the expected JSON shape for a task creation
-public record CreateTaskRequest(string Title, string? Description, DateTime DueDate);
+public record CreateTaskRequest(string Title, string? Description, DateTime? DueDate);
 public record UpdateStatusRequest(string NewStatus);
 
