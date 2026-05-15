@@ -1,44 +1,31 @@
-@page "/manage-tasks"
+@page "/"
 @using TaskManager.Models
 @using TaskManager.Services
 @inject TaskApiService TaskApi
+@inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<h1>Manage Tasks</h1>
 
-<button class = "btn btn-primary mb-3" @onclick="ShowCreateForm">Create New Task</button>
 
-@*Inline form visible when showCreateForm is true*@
-@if (showCreateForm)
-{
-    <div class="card p-3 mb-3">
-            <h5 class="card-title">Create New Task</h5>
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" id="title" class="form-control" @bind="newTask.Title" />
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" class="form-control" @bind="newTask.Description"></textarea>
-            </div>
-            <div class="mb-3">
-                <label for="dueDate" class="form-label">Due Date</label>
-                <input type="date" id="dueDate" class="form-control" @bind="newTask.DueDate" />
-            </div>
-            <button class="btn btn-success" @onclick="CreateTask">Create</button>
-            <button class="btn btn-secondary ms-2" @onclick="HideCreateForm">Cancel</button>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">Manage Tasks</h1>
+    <button class="btn btn-primary" @onclick="GoToCreate">+ Create New Task</button>
+</div>
 
-}
+
 
 @*Display Existing Tasks*@
-<table class="table">
-    <thead>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
         <tr>
             <th>Title</th>
             <th>Description</th>
             <th>Status</th>
             <th>Due Date</th>
+            <th></th>
+            
         </tr>
     </thead>
     <tbody>
@@ -64,6 +51,8 @@
         }
     </tbody>
 </table>
+</div>
+</div>
 
 @code{
     private List<TaskItem> tasks = new List<TaskItem>();
@@ -104,5 +93,10 @@
     {
         await TaskApi.DeleteTaskAsync(taskId);
         tasks = await TaskApi.GetAllTasksAsync();
+    }
+
+    private void GoToCreate()
+    {
+        Navigation.NavigateTo("/CreateTask");
     }
 }
