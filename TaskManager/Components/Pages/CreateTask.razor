@@ -1,0 +1,72 @@
+@page "/CreateTask"
+@using TaskManager.Models
+@using TaskManager.Services
+@inject TaskApiService TaskApi
+@rendermode InteractiveServer
+
+<h1>Create a new task</h1>
+
+
+
+    <div class="card p-4 mb-4 mx-auto" style="max-width: 700px;">
+       
+            <div class="mb-4">
+                <label for="title" class="form-label">Title<span class="text-danger">*</span></label>
+                <input type="text" id="title" class="form-control" @bind="newTask.Title" />
+            </div>
+            <div class="mb-4">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" class="form-control" @bind="newTask.Description"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="dueDate" class="form-label">Due Date</label>
+                <input type="date" id="dueDate" class="form-control" @bind="newTask.DueDate" />
+            </div>
+            <button class="btn btn-success" @onclick="CreateNewTask" disabled="@string.IsNullOrWhiteSpace(newTask.Title)">Create</button>
+
+        </div>
+
+@* show success or error messages after task creation *@
+    @if (successMessage is not null)
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+    @if (errorMessage is not null)
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+
+@code{
+    private TaskItem newTask = new TaskItem();
+    private string? successMessage;
+    private string? errorMessage;
+
+    private async Task CreateNewTask()
+    {
+        successMessage = null;
+        errorMessage = null;
+        StateHasChanged(); 
+        try
+        {
+            await TaskApi.CreateTaskAsync(newTask.Title, newTask.Description, newTask.DueDate);
+            successMessage = "Task successfully created";
+            // Reset form
+            newTask = new TaskItem();
+            StateHasChanged();
+            await Task.Delay(2000);
+            successMessage = null;
+        
+        }
+        catch
+        {
+            errorMessage = "Failed to create task. Please try again shortly";
+            StateHasChanged();
+            await Task.Delay(2000);
+            errorMessage = null;
+        
+        }
+        
+    }
+}

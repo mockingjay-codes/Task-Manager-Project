@@ -1,6 +1,15 @@
 using TaskManager.Components;
+using TaskManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Register HTTPClient pointing at the API project
+builder.Services.AddHttpClient("TaskAPI", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5282/");
+});
+
+builder.Services.AddScoped<TaskApiService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

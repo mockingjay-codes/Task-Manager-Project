@@ -1,0 +1,102 @@
+@page "/"
+@using TaskManager.Models
+@using TaskManager.Services
+@inject TaskApiService TaskApi
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">Manage Tasks</h1>
+    <button class="btn btn-primary" @onclick="GoToCreate">+ Create New Task</button>
+</div>
+
+
+
+@*Display Existing Tasks*@
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th></th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in tasks)
+        {
+            <tr>
+                <td>@task.Title</td>
+                <td>@task.Description</td>
+                <td>
+                    @*Dropdown calls ChangeStatus when status selection changes*@
+                    <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => ChangeStatus(task.Id, e.Value!.ToString()!)">
+                        <option>Pending</option>
+                        <option >InProgress</option>
+                        <option >Completed</option>
+                        <option  >Cancelled</option>
+                    </select>
+                </td>
+                <td>@task.DueDate</td>
+                <td>
+                    <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeleteTask(task.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+</div>
+
+@code{
+    private List<TaskItem> tasks = new List<TaskItem>();
+    private bool showCreateForm = false;
+    private TaskItem newTask = new TaskItem();
+
+    // Fetch all tasks on page load
+    protected override async Task OnInitializedAsync()
+    {
+        tasks = await TaskApi.GetAllTasksAsync();
+    }
+
+    private void ShowCreateForm()
+    {
+        showCreateForm = true;
+    }
+
+    private void HideCreateForm()
+    {
+        showCreateForm = false;
+        newTask = new TaskItem(); 
+    }
+
+    private async Task CreateTask()
+    {
+        await TaskApi.CreateTaskAsync(newTask.Title, newTask.Description, newTask.DueDate);
+        tasks = await TaskApi.GetAllTasksAsync();
+        HideCreateForm();
+    }
+
+    private async Task ChangeStatus(int taskId, string newStatus)
+    {
+        await TaskApi.UpdateTaskStatusAsync(taskId, newStatus);
+        tasks = await TaskApi.GetAllTasksAsync();
+    }
+
+    private async Task DeleteTask(int taskId)
+    {
+        await TaskApi.DeleteTaskAsync(taskId);
+        tasks = await TaskApi.GetAllTasksAsync();
+    }
+
+    private void GoToCreate()
+    {
+        Navigation.NavigateTo("/CreateTask");
+    }
+}
