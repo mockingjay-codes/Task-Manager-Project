@@ -58,3 +58,6 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+table tbody tr.status-completed td  { background-color: rgba(0, 147, 79, 0.1) !important; }
+table tbody tr.status-cancelled td  { background-color: rgba(126, 1, 14, 0.1) !important; }

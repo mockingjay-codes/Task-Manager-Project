@@ -5,82 +5,76 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-
-
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-5">
     <h1 class="fw-bold">Manage Tasks</h1>
-    <button class="btn btn-primary" @onclick="GoToCreate">+ Create New Task</button>
+    @if (tasks.Any())
+    {
+        <button class="btn btn-primary" @onclick="GoToCreate">+ Create New Task</button>
+    }
 </div>
 
+@if (!tasks.Any())
+{
+    <div class="text-center py-5">
+        <p class="fs-1">📋</p>
+        <h5 class="text-muted mb-3">No tasks yet</h5>
+        <p class="text-muted mb-4">Get started by creating your first task.</p>
+        <button class="btn btn-primary" @onclick="GoToCreate">+ Create your first task</button>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 25%">Title</th>
+                        <th style="width: 35%">Description</th>
+                        <th style="width: 15%">Status</th>
+                        <th style="width: 15%">Due Date</th>
+                        <th style="width: 10%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in tasks)
+                    {
+                        <tr class="@GetRowClass(task.Status)">
+                            <td>@task.Title</td>
+                            <td>@(string.IsNullOrWhiteSpace(task.Description) ? "--" : task.Description)</td>
+                            <td>
+                                <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => await ChangeStatus(task.Id, e.Value!.ToString()!)">
+                                    <option>Pending</option>
+                                    <option>InProgress</option>
+                                    <option>Completed</option>
+                                    <option>Cancelled</option>
+                                </select>
+                            </td>
+                            <td>@(task.DueDate.HasValue ? task.DueDate.Value.ToString("dd/MM/yyyy") : "--")</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTask(task.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
 
-
-@*Display Existing Tasks*@
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Due Date</th>
-            <th></th>
-            
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var task in tasks)
-        {
-            <tr>
-                <td>@task.Title</td>
-                <td>@task.Description</td>
-                <td>
-                    @*Dropdown calls ChangeStatus when status selection changes*@
-                    <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => ChangeStatus(task.Id, e.Value!.ToString()!)">
-                        <option>Pending</option>
-                        <option >InProgress</option>
-                        <option >Completed</option>
-                        <option  >Cancelled</option>
-                    </select>
-                </td>
-                <td>@task.DueDate</td>
-                <td>
-                    <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeleteTask(task.Id)">Delete</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-</div>
-</div>
-
-@code{
+@code {
     private List<TaskItem> tasks = new List<TaskItem>();
-    private bool showCreateForm = false;
     private TaskItem newTask = new TaskItem();
 
-    // Fetch all tasks on page load
     protected override async Task OnInitializedAsync()
     {
         tasks = await TaskApi.GetAllTasksAsync();
-    }
-
-    private void ShowCreateForm()
-    {
-        showCreateForm = true;
-    }
-
-    private void HideCreateForm()
-    {
-        showCreateForm = false;
-        newTask = new TaskItem(); 
     }
 
     private async Task CreateTask()
     {
         await TaskApi.CreateTaskAsync(newTask.Title, newTask.Description, newTask.DueDate);
         tasks = await TaskApi.GetAllTasksAsync();
-        HideCreateForm();
     }
 
     private async Task ChangeStatus(int taskId, string newStatus)
@@ -99,4 +93,13 @@
     {
         Navigation.NavigateTo("/CreateTask");
     }
+
+    private string GetRowClass(string status) => status switch
+    {
+        "Pending"    => "status-pending",
+        "InProgress" => "status-inprogress",
+        "Completed"  => "status-completed",
+        "Cancelled"  => "status-cancelled",
+        _            => ""
+    };
 }
