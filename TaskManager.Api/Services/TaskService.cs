@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Data;
 using TaskManager.Api.Models;
+using TaskStatus = TaskManager.Api.Models.TaskStatus;
 
 namespace TaskManager.Api.Services;
 
@@ -8,7 +9,6 @@ namespace TaskManager.Api.Services;
 
 public class TaskService(AppDbContext db)
 {
-    private static readonly HashSet<string> ValidStatuses = ["Pending", "InProgress", "Completed", "Cancelled"];
 
     // Get all tasks, sort by due date
     public async Task<List<TaskItem>> GetAllAsync() =>
@@ -32,7 +32,7 @@ public class TaskService(AppDbContext db)
             Title = title,
             Description = description,
             DueDate = dueDate,
-            Status = "Pending",
+            Status = TaskStatus.Pending,
             CreatedOn = DateTime.UtcNow
         };
         db.Tasks.Add(task);
@@ -42,11 +42,8 @@ public class TaskService(AppDbContext db)
 
     // Update status of existing task
     // Return null if task not found
-    public async Task<TaskItem?> UpdateStatusAsync(int id, string newStatus)
+    public async Task<TaskItem?> UpdateStatusAsync(int id, TaskStatus newStatus)
     {
-        if (!ValidStatuses.Contains(newStatus))
-            throw new ArgumentException($"Invalid status: {newStatus}");
-
         TaskItem? task = await db.Tasks.FindAsync(id);
         if (task is null) return null;
         task.Status = newStatus;
@@ -56,14 +53,12 @@ public class TaskService(AppDbContext db)
 
     // Update existing task
     // Return null if task not found
-    public async Task<TaskItem?> UpdateAsync(int id, string title, string? description, DateTime? dueDate, string status)
+    public async Task<TaskItem?> UpdateAsync(int id, string title, string? description, DateTime? dueDate, TaskStatus status)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title is required");
         if (dueDate is null)
             throw new ArgumentException("Due date is required");
-        if (!ValidStatuses.Contains(status))
-            throw new ArgumentException($"Invalid status: {status}");
 
         TaskItem? task = await db.Tasks.FindAsync(id);
         if (task is null) return null;

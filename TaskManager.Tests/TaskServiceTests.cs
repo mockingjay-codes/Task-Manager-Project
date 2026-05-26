@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Api.Data;
+using TaskManager.Api.Models;
 using TaskManager.Api.Services;
+using TaskStatus = TaskManager.Api.Models.TaskStatus;
 
 namespace TaskManager.Tests;
 
@@ -34,7 +36,7 @@ public class TaskServiceTests
         var task = await service.CreateAsync("Test task", "desc", DateTime.UtcNow.AddDays(1));
 
         Assert.Equal("Test task", task.Title);
-        Assert.Equal("Pending", task.Status);
+        Assert.Equal(TaskStatus.Pending, task.Status);
     }
 
     [Fact]
@@ -109,10 +111,10 @@ public class TaskServiceTests
         var service = new TaskService(db);
         var created = await service.CreateAsync("Update me", null, DateTime.UtcNow.AddDays(1));
 
-        var result = await service.UpdateStatusAsync(created.Id, "InProgress");
+        var result = await service.UpdateStatusAsync(created.Id, TaskStatus.InProgress);
 
         Assert.NotNull(result);
-        Assert.Equal("InProgress", result.Status);
+        Assert.Equal(TaskStatus.InProgress, result.Status);
     }
 
     [Fact]
@@ -121,7 +123,7 @@ public class TaskServiceTests
         using var db = CreateDb();
         var service = new TaskService(db);
 
-        var result = await service.UpdateStatusAsync(999, "Completed");
+        var result = await service.UpdateStatusAsync(999, TaskStatus.Completed);
 
         Assert.Null(result);
     }
@@ -133,12 +135,12 @@ public class TaskServiceTests
         var service = new TaskService(db);
         var created = await service.CreateAsync("Old Title", "Old Desc", DateTime.UtcNow.AddDays(1));
 
-        var result = await service.UpdateAsync(created.Id, "New Title", "New Desc", DateTime.UtcNow.AddDays(5), "Cancelled");
+        var result = await service.UpdateAsync(created.Id, "New Title", "New Desc", DateTime.UtcNow.AddDays(5), TaskStatus.Cancelled);
 
         Assert.NotNull(result);
         Assert.Equal("New Title", result.Title);
         Assert.Equal("New Desc", result.Description);
-        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(TaskStatus.Cancelled, result.Status);
         Assert.Equal(DateTime.UtcNow.AddDays(5).Date, result.DueDate!.Value.Date);
     }
 
@@ -148,7 +150,7 @@ public class TaskServiceTests
         using var db = CreateDb();
         var service = new TaskService(db);
 
-        var result = await service.UpdateAsync(999, "Title", "Desc", DateTime.UtcNow, "Pending");
+        var result = await service.UpdateAsync(999, "Title", "Desc", DateTime.UtcNow, TaskStatus.Pending);
 
         Assert.Null(result);
     }
@@ -161,7 +163,7 @@ public class TaskServiceTests
         var created = await service.CreateAsync("Title", null, DateTime.UtcNow.AddDays(1));
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => service.UpdateAsync(created.Id, "Title", null, null, "Pending"));
+            () => service.UpdateAsync(created.Id, "Title", null, null, TaskStatus.Pending));
     }
 
     [Fact]

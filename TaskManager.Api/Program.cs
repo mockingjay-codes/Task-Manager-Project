@@ -8,7 +8,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite("Data Source=tasks.db"));
 
 builder.Services.AddScoped<TaskService>();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+
 
 // Configure CORS to allow requests from the blazor frontend
 builder.Services.AddCors(opt =>

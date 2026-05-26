@@ -72,10 +72,13 @@ else
         tasks = await TaskApi.GetAllTasksAsync();
     }
 
-    private async Task ChangeStatus(int taskId, string newStatus)
+    private async Task ChangeStatus(int taskId, string newStatusStr)
     {
-        await TaskApi.UpdateTaskStatusAsync(taskId, newStatus);
-        tasks = await TaskApi.GetAllTasksAsync();
+        if (Enum.TryParse<TaskManager.Models.TaskStatus>(newStatusStr, out var newStatus))
+        {
+            await TaskApi.UpdateTaskStatusAsync(taskId, newStatus);
+            tasks = await TaskApi.GetAllTasksAsync();
+        }
     }
 
     private async Task DeleteTask(int taskId)
@@ -89,13 +92,13 @@ else
         Navigation.NavigateTo("/CreateTask");
     }
 
-    private string GetRowClass(string status) => status switch
+    private string GetRowClass(TaskManager.Models.TaskStatus status) => status switch
     {
-        "Pending"    => "status-pending",
-        "InProgress" => "status-inprogress",
-        "Completed"  => "status-completed",
-        "Cancelled"  => "status-cancelled",
-        _            => ""
+        TaskManager.Models.TaskStatus.Pending    => "status-pending",
+        TaskManager.Models.TaskStatus.InProgress => "status-inprogress",
+        TaskManager.Models.TaskStatus.Completed  => "status-completed",
+        TaskManager.Models.TaskStatus.Cancelled  => "status-cancelled",
+        _                                        => ""
     };
 
     private void GoToDetail(int id) => Navigation.NavigateTo($"/tasks/{id}");

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Api.Services;
 using TaskManager.Api.Models;
+using TaskStatus = TaskManager.Api.Models.TaskStatus;
 
 namespace TaskManager.Api.Controllers;
 
@@ -46,7 +47,6 @@ public class TasksController(TaskService taskService) : ControllerBase
     [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewStatus)) return BadRequest("Status is required");
         try
         {
             TaskItem? updatedTask = await taskService.UpdateStatusAsync(id, request.NewStatus);
@@ -90,7 +90,7 @@ public class TasksController(TaskService taskService) : ControllerBase
 
 // Define the expected JSON shape for a task creation
 public record CreateTaskRequest(string Title, string? Description, DateTime? DueDate);
-public record UpdateStatusRequest(string NewStatus);
-public record UpdateTaskRequest(string Title, string? Description, DateTime? DueDate, string Status);
+public record UpdateStatusRequest(TaskStatus NewStatus);
+public record UpdateTaskRequest(string Title, string? Description, DateTime? DueDate, TaskStatus Status);
 
 
