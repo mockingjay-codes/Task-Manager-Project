@@ -7,11 +7,19 @@ public class TaskApiService(IHttpClientFactory httpClientFactory)
 {
     private HttpClient HttpClient => httpClientFactory.CreateClient("TaskAPI");
 
-    public async Task<List<TaskItem>> GetAllTasksAsync() =>
-        await HttpClient.GetFromJsonAsync<List<TaskItem>>("api/tasks") ?? new List<TaskItem>();
+    public async Task<List<TaskItem>> GetAllTasksAsync()
+    {
+        var response = await HttpClient.GetAsync("api/tasks");
+        if (!response.IsSuccessStatusCode) return new List<TaskItem>();
+        return await response.Content.ReadFromJsonAsync<List<TaskItem>>() ?? new List<TaskItem>();
+    }
 
-    public async Task<TaskItem?> GetTaskByIdAsync(int id) =>
-        await HttpClient.GetFromJsonAsync<TaskItem>($"api/tasks/{id}");
+    public async Task<TaskItem?> GetTaskByIdAsync(int id)
+    {
+        var response = await HttpClient.GetAsync($"api/tasks/{id}");
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadFromJsonAsync<TaskItem>();
+    }
 
     public async Task<TaskItem?> CreateTaskAsync(string title, string? description, DateTime? dueDate)
     {
@@ -30,6 +38,19 @@ public class TaskApiService(IHttpClientFactory httpClientFactory)
         var response = await HttpClient.PatchAsJsonAsync($"api/tasks/{id}/status", new
         {
             NewStatus = newStatus
+        });
+        if (response.IsSuccessStatusCode) return await response.Content.ReadFromJsonAsync<TaskItem>();
+        return null;
+    }
+
+    public async Task<TaskItem?> UpdateTaskAsync(int id, string title, string? description, DateTime? dueDate, string status)
+    {
+        var response = await HttpClient.PutAsJsonAsync($"api/tasks/{id}", new
+        {
+            Title = title,
+            Description = description,
+            DueDate = dueDate,
+            Status = status
         });
         if (response.IsSuccessStatusCode) return await response.Content.ReadFromJsonAsync<TaskItem>();
         return null;

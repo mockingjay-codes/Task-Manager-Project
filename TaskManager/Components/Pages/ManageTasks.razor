@@ -13,6 +13,7 @@
     }
 </div>
 
+@* Show an empty state message if no tasks exist, else show tasks table *@
 @if (!tasks.Any())
 {
     <div class="text-center py-5">
@@ -39,20 +40,21 @@ else
                 <tbody>
                     @foreach (var task in tasks)
                     {
-                        <tr class="@GetRowClass(task.Status)">
+                        <tr class="@GetRowClass(task.Status)" style="cursor:pointer;" @onclick="() => GoToDetail(task.Id)">
+
                             <td>@task.Title</td>
                             <td>@(string.IsNullOrWhiteSpace(task.Description) ? "--" : task.Description)</td>
                             <td>
                                 <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => await ChangeStatus(task.Id, e.Value!.ToString()!)">
-                                    <option>Pending</option>
-                                    <option>InProgress</option>
-                                    <option>Completed</option>
-                                    <option>Cancelled</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="InProgress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
                                 </select>
                             </td>
                             <td>@(task.DueDate.HasValue ? task.DueDate.Value.ToString("dd/MM/yyyy") : "--")</td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTask(task.Id)">Delete</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTask(task.Id)" @onclick:stopPropagation="true">Delete</button>
                             </td>
                         </tr>
                     }
@@ -64,16 +66,9 @@ else
 
 @code {
     private List<TaskItem> tasks = new List<TaskItem>();
-    private TaskItem newTask = new TaskItem();
 
     protected override async Task OnInitializedAsync()
     {
-        tasks = await TaskApi.GetAllTasksAsync();
-    }
-
-    private async Task CreateTask()
-    {
-        await TaskApi.CreateTaskAsync(newTask.Title, newTask.Description, newTask.DueDate);
         tasks = await TaskApi.GetAllTasksAsync();
     }
 
@@ -102,4 +97,7 @@ else
         "Cancelled"  => "status-cancelled",
         _            => ""
     };
+
+    private void GoToDetail(int id) => Navigation.NavigateTo($"/tasks/{id}");
+
 }

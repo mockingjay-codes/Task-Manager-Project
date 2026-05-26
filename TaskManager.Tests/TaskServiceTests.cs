@@ -35,7 +35,47 @@ public class TaskServiceTests
 
         Assert.Equal("Test task", task.Title);
         Assert.Equal("Pending", task.Status);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PersistsToDatabase()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+
+        await service.CreateAsync("Test task", "desc", DateTime.UtcNow.AddDays(1));
+
         Assert.Equal(1, await db.Tasks.CountAsync());
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenTitleIsEmpty()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync("", null, null));
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenTitleIsWhitespace()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync("   ", null, null));
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenDueDateIsNull()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync("Title", null, null));
     }
 
     [Fact]
@@ -84,6 +124,44 @@ public class TaskServiceTests
         var result = await service.UpdateStatusAsync(999, "Completed");
 
         Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UpdatesTask_WhenFound()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+        var created = await service.CreateAsync("Old Title", "Old Desc", DateTime.UtcNow.AddDays(1));
+
+        var result = await service.UpdateAsync(created.Id, "New Title", "New Desc", DateTime.UtcNow.AddDays(5), "Cancelled");
+
+        Assert.NotNull(result);
+        Assert.Equal("New Title", result.Title);
+        Assert.Equal("New Desc", result.Description);
+        Assert.Equal("Cancelled", result.Status);
+        Assert.Equal(DateTime.UtcNow.AddDays(5).Date, result.DueDate!.Value.Date);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReturnsNull_WhenNotFound()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+
+        var result = await service.UpdateAsync(999, "Title", "Desc", DateTime.UtcNow, "Pending");
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Throws_WhenDueDateIsNull()
+    {
+        using var db = CreateDb();
+        var service = new TaskService(db);
+        var created = await service.CreateAsync("Title", null, DateTime.UtcNow.AddDays(1));
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.UpdateAsync(created.Id, "Title", null, null, "Pending"));
     }
 
     [Fact]

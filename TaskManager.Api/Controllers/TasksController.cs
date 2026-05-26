@@ -30,8 +30,15 @@ public class TasksController(TaskService taskService) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(request.Title)) return BadRequest("Title is required");
 
-        TaskItem? task = await taskService.CreateAsync(request.Title, request.Description, request.DueDate);
-        return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+        try
+        {
+            TaskItem? task = await taskService.CreateAsync(request.Title, request.Description, request.DueDate);
+            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
     }
 
@@ -40,12 +47,35 @@ public class TasksController(TaskService taskService) : ControllerBase
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.NewStatus)) return BadRequest("Status is required");
+        try
+        {
+            TaskItem? updatedTask = await taskService.UpdateStatusAsync(id, request.NewStatus);
+            if (updatedTask is null) return NotFound();
+            return Ok(updatedTask);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
-        TaskItem? updatedTask = await taskService.UpdateStatusAsync(id, request.NewStatus);
-    
-        if (updatedTask is null) return NotFound();
-        return Ok(updatedTask);
 
+    // PUT /api/tasks/{id}
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title)) return BadRequest("Title is required");
+
+        try
+        {
+            TaskItem? task = await taskService.UpdateAsync(id, request.Title, request.Description, request.DueDate, request.Status);
+            if (task is null) return NotFound();
+            return Ok(task);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // DELETE /api/tasks/{id}
@@ -61,4 +91,6 @@ public class TasksController(TaskService taskService) : ControllerBase
 // Define the expected JSON shape for a task creation
 public record CreateTaskRequest(string Title, string? Description, DateTime? DueDate);
 public record UpdateStatusRequest(string NewStatus);
+public record UpdateTaskRequest(string Title, string? Description, DateTime? DueDate, string Status);
+
 

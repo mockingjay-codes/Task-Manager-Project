@@ -18,8 +18,7 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Empty the database on startup
-// EnsureCreated will create the database if it doesn't exist
+// Create the database if it doesn't exist
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

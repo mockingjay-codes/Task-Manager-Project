@@ -1,0 +1,93 @@
+@page "/tasks/{Id:int}"
+@using TaskManager.Models
+@using TaskManager.Services
+@inject TaskApiService TaskApi
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">Task Details</h1>
+    <button class="btn btn-outline-secondary" @onclick="GoBack">← Back</button>
+</div>
+
+@if (isLoading)
+{
+    <p class="text-muted">Loading...</p>
+}
+else if (task is null)
+{
+    <p class="text-muted">Task not found.</p>
+}
+else
+{
+    <div class="card p-4 mx-auto" style="max-width: 700px;">
+        <div class="mb-4">
+            <label class="form-label">Title<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" @bind="task.Title" />
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" @bind="task.Description"></textarea>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Due Date<span class="text-danger">*</span></label>
+            <input type="date" class="form-control" @bind="task.DueDate" />
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Status</label>
+            <select class="form-select" @bind="task.Status">
+                <option value="Pending">Pending</option>
+                <option value="InProgress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+        </div>
+
+        <button class="btn btn-success" @onclick="SaveChanges" disabled="@(string.IsNullOrWhiteSpace(task.Title) || !task.DueDate.HasValue)">Save Changes</button>
+
+        @if (successMessage is not null)
+        {
+            <div class="alert alert-success mt-3">@successMessage</div>
+        }
+        @if (errorMessage is not null)
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private TaskItem? task;
+    private bool isLoading = true;
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        task = await TaskApi.GetTaskByIdAsync(Id);
+        isLoading = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        if (task is null) return;
+        successMessage = null;
+        errorMessage = null;
+        try
+        {
+            await TaskApi.UpdateTaskAsync(task.Id, task.Title, task.Description, task.DueDate, task.Status);
+            successMessage = "Task updated successfully";
+            StateHasChanged();
+            await Task.Delay(1000);
+            Navigation.NavigateTo("/");
+        }
+        catch
+        {
+            errorMessage = "Failed to update task. Please try again.";
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/");
+}
