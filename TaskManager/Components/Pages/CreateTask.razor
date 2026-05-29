@@ -3,6 +3,7 @@
 @using TaskManager.Services
 @inject TaskApiService TaskApi
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 
 
@@ -24,7 +25,7 @@
             </div>
             <div class="mb-4">
                 <label for="dueDate" class="form-label">Due Date<span class="text-danger">*</span></label>
-                <input type="date" id="dueDate" class="form-control" @bind="newTask.DueDate" />
+                <input @ref="dueDateRef" type="text" id="dueDate" class="form-control" @onchange="OnDueDateChange" placeholder="dd/mm/yyyy" />
             </div>
             <button class="btn btn-success" @onclick="CreateNewTask" disabled="@(string.IsNullOrWhiteSpace(newTask.Title) || !newTask.DueDate.HasValue)">Create</button>
 
@@ -46,6 +47,23 @@
     private TaskItem newTask = new TaskItem();
     private string? successMessage;
     private string? errorMessage;
+    private ElementReference dueDateRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("initFlatpickr", dueDateRef, (object?)null);
+    }
+
+    private void OnDueDateChange(ChangeEventArgs e)
+    {
+        if (DateTime.TryParseExact(e.Value?.ToString(), "d/M/yyyy",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var date))
+            newTask.DueDate = date;
+        else
+            newTask.DueDate = null;
+    }
 
     private async Task CreateNewTask()
     {
@@ -58,6 +76,7 @@
             successMessage = "Task successfully created";
             // Reset form after submission
             newTask = new TaskItem();
+            await JS.InvokeVoidAsync("clearFlatpickr", dueDateRef);
             StateHasChanged();
             await Task.Delay(700);
             GoToHome();

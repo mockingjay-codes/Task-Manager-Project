@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="@Assets["TaskManager.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <HeadOutlet />
 </head>
 
@@ -18,6 +19,19 @@
     <Routes />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        function initFlatpickr(element, initialDate) {
+            flatpickr(element, {
+                dateFormat: "d/m/Y",
+                defaultDate: initialDate || null,
+                allowInput: true
+            });
+        }
+        function clearFlatpickr(element) {
+            if (element._flatpickr) element._flatpickr.clear();
+        }
+    </script>
 </body>
 
 </html>

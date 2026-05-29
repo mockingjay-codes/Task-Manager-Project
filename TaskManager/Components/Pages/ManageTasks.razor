@@ -45,7 +45,7 @@ else
                             <td>@task.Title</td>
                             <td>@(string.IsNullOrWhiteSpace(task.Description) ? "--" : task.Description)</td>
                             <td>
-                                <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => await ChangeStatus(task.Id, e.Value!.ToString()!)">
+                                <select class="form-select form-select-sm" value="@task.Status" @onchange="async e => await ChangeStatus(task.Id, e.Value!.ToString()!)" @onclick:stopPropagation="true">
                                     <option value="Pending">Pending</option>
                                     <option value="InProgress">In Progress</option>
                                     <option value="Completed">Completed</option>

@@ -27,14 +27,16 @@ dotnet --version
 
 The solution consists of two projects: the API and the frontend. Both need to be running simultaneously.
 
-**Terminal 1 — API**
+1. Clone the repository and navigate into the project folder
+
+2. **Terminal 1 — API**
 ```
 cd TaskManager.Api
 dotnet run
 ```
 Runs at `http://localhost:5282`
 
-**Terminal 2 — Frontend**
+3. **Terminal 2 — Frontend**
 ```
 cd TaskManager
 dotnet run
@@ -42,6 +44,18 @@ dotnet run
 Runs at `http://localhost:5026` 
 
 If the browser does not open automatically, navigate to `http://localhost:5026`.
+
+## Troubleshooting
+
+**NuGet packages fail to restore on Windows (common if project is in OneDrive):** OneDrive can interfere with NuGet's package cache. First, check that nuget.org is configured as a source:
+```
+dotnet nuget list source
+```
+If `https://api.nuget.org/v3/index.json` is missing or disabled, add it:
+```
+dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
+```
+Then run `dotnet restore`. If the issue persists, move the project to a local folder outside OneDrive and try again.
 
 ## API Endpoints
 
@@ -54,11 +68,12 @@ If the browser does not open automatically, navigate to `http://localhost:5026`.
 | PUT | `/api/tasks/{id}` | Update a task (title, description, due date, status) |
 | DELETE | `/api/tasks/{id}` | Delete a task |
 
+**Allowed statuses:** `Pending`, `InProgress`, `Completed`, `Cancelled`
+
 ## Validation & Error Handling
 
 **Error Handling in API**
 - **Title is required** - returns `400 Bad Request` if title is missing
-- **Status is required** - returns `400 Bad Request` if status is missing on update
 - **Not found** - returns `404 Not Found` for requests on non-existent tasks
 - **Delete** - a successful delete operation returns `204 No Content`
 
@@ -72,9 +87,9 @@ If the browser does not open automatically, navigate to `http://localhost:5026`.
 
 The test suite covers all core service methods including creating, retrieving, updating, and deleting tasks. Tests use an in-memory database so no setup is required.
 
+From the root of the project, run:
 ```
-cd TaskManager.Tests
-dotnet test
+dotnet test TaskManager.Tests
 ```
 
 ## App Demo
@@ -112,3 +127,9 @@ To enhance usability, conditional formatting is applied to the list: cancelled t
 Users can update an existing task by selecting it from the table on the home screen, which opens the task details page. From here, users can view all task information and modify the title, status, and description. The **Save Changes** button is disabled if title or due date are empty.
 
 ![Manage Tasks](Screenshots/task-details.png)
+
+## Future Improvements
+
+- **Authentication & authorisation** — restrict access to authenticated caseworkers only
+- **CORS restriction** — limit allowed origins to the known frontend URL in production
+- **Task filtering & search** — filter by status, search by title
